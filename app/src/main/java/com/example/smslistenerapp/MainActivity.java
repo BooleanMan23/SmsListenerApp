@@ -1,6 +1,8 @@
 package com.example.smslistenerapp;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +15,9 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     Button btnCheckPermission;
     final int SMS_REQUEST_CODE = 101;
+    Button btnDownload;
+    public static final String ACTION_DOWNLOAD_STATUS = "download_status";
+    private BroadcastReceiver downloadReceiver;
 
 
     @Override
@@ -21,12 +26,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         btnCheckPermission = findViewById(R.id.btn_permission);
         btnCheckPermission.setOnClickListener(this);
+        btnDownload = findViewById(R.id.btn_download);
+        btnDownload.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.btn_permission) {
             PermissionManager.check(this, Manifest.permission.RECEIVE_SMS, SMS_REQUEST_CODE);
+        }
+        else if (v.getId() == R.id.btn_download) {
+            Intent downloadServiceIntent = new Intent(this, DownloadService.class);
+            startService(downloadServiceIntent);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (downloadReceiver != null) {
+            unregisterReceiver(downloadReceiver);
         }
     }
 
